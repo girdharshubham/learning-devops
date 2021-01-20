@@ -1,0 +1,80 @@
+version: "3.7"
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.0
+    restart: always
+    hostname: zookeeper
+    networks:
+      - kafka
+    environment:
+      - ZOOKEEPER_SERVER_ID=${ZOOKEEPER_SERVER_ID:-1}
+      - ZOOKEEPER_CLIENT_PORT=${ZOOKEEPER_CLIENT_PORT:-2181}
+      - ZOOKEEPER_TICK_TIME=${ZOOKEEPER_TICK_TIME:-2000}
+      - ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:-0.0.0.0:2888:3888}
+      - KAFKA_HEAP_OPTS=${KAFKA_HEAP_OPTS:--Dzookeeper.4lw.commands.whitelist=ruok}
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc 0.0.0.0 2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+  kafka:
+    image: confluentinc/cp-kafka:5.5.0
+    hostname: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    networks:
+      - kafka
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT:-zookeeper:2181}
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
+      - KAFKA_INTER_BROKER_LISTENER_NAME=${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT}
+      - KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS:-PLAINTEXT_HOST://localhost:9092,PLAINTEXT://kafka:9093}
+      - KAFKA_BROKER_ID=${KAFKA_BROKER_ID:-1}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:-1}
+      - KAFKA_DELETE_TOPIC_ENABLE=${KAFKA_DELETE_TOPIC_ENABLE:-true}
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=${KAFKA_AUTO_CREATE_TOPICS_ENABLE:-true}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "test `kafka-topics --bootstrap-server kafka:9093 --list | wc -w` -gt 0"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+  postgresql:
+    image: postgres:12-alpine
+    container_name: postgresql
+    networks:
+      - postgresql
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=changeme
+    ports:
+      - 5432:543
+  kafka-fill:
+    image: confluentinc/cp-kafka:5.5.0
+    command: ["/bin/bash", "-c", "./run.sh"]
+    working_dir: /home
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      - TOPIC=one
+    networks:
+      - kafka
+    volumes:
+      - ./test/:/home
+networks:
+  kafka:
+  postgresql:
+volumes:
+  pgdata:
