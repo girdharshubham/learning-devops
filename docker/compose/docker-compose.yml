@@ -48,18 +48,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-  postgresql:
-    image: postgres:12-alpine
-    container_name: postgresql
-    networks:
-      - postgresql
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changeme
-    ports:
-      - 5432:543
   kafka-fill:
     image: confluentinc/cp-kafka:5.5.0
     command: ["/bin/bash", "-c", "./run.sh"]
