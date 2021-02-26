@@ -1,68 +1,146 @@
-version: "3.7"
+version: "3.5"
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:5.5.0
-    restart: always
-    hostname: zookeeper
+  elasticssearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.3.1"
+    container_name: "elasticsearch"
     networks:
-      - kafka
+      - elastic
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
     environment:
-      - ZOOKEEPER_SERVER_ID=${ZOOKEEPER_SERVER_ID:-1}
-      - ZOOKEEPER_CLIENT_PORT=${ZOOKEEPER_CLIENT_PORT:-2181}
-      - ZOOKEEPER_TICK_TIME=${ZOOKEEPER_TICK_TIME:-2000}
-      - ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:-0.0.0.0:2888:3888}
-      - KAFKA_HEAP_OPTS=${KAFKA_HEAP_OPTS:--Dzookeeper.4lw.commands.whitelist=ruok}
+      - cluster.name=sanbox
+      - xpack.security.enabled=true
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=changeme
+    # Uncomment below if you want to enable localhost:9200 to work
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  kibana:
+    image: "docker.elastic.co/kibana/kibana:7.3.1"
+    container_name: "kibana"
+    networks:
+      - elastic
+    environment:
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - XPACK_SECURITY_ENABLED=true
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+  cassandra:
+    image: "cassandra:latest"
+    container_name: cassandra
+    networks:
+      - cassandra
+    volumes:
+      - cassandra:/var/lib/cassandra
+      # - "./dumps/data:/var/lib/cassandra/data"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=bitbrew_configuration
+      - CASSANDRA_NUM_TOKENS=4
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_RACK=b
+      - CASSANDRA_DC=us-central1
+    ports:
+      - 9042:9042
+      - 7000:7000
+      - 7001:7001
+      - 7199:7199
+  postgresql:
+    image: postgres:12-alpine
+    container_name: postgresql
+    networks:
+      - postgresql
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=bitbrew
+    ports:
+      - 5432:5432
+  rabbit:
+    build:
+      context: ../dockerfile/rabbitmq
+      dockerfile: Dockerfile
+    image: rabbitmq:mgmt
+    container_name: rabbit
+    networks:
+      - rabbit
+    volumes:
+      - rabbit:/var/lib/rabbitmq
+    ports:
+      - 4369:4369
+      - 5671:5671
+      - 5672:5672
+      - 15672:15672
+  zeppelin:
+    image: apache/zeppelin:0.9.0
+    networks:
+      - zeppelin
+      - cassandra
+    ports:
+      - 8080:8080
+    volumes:
+      - zep:/zeppelin
+  zookeeper:
+    environment:
+      - ZOOKEEPER_TICK_TIME=5000
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_DATA_DIR=/home/zookeeper
+      - ZOOKEEPER_SERVER_ID=1
+      - ZOOKEEPER_SERVERS=0.0.0.0:2888:3888
+      - KAFKA_HEAP_OPTS=-Dzookeeper.4lw.commands.whitelist=state,ruok
     ports:
       - "2181:2181"
-    healthcheck:
-      test: ["CMD-SHELL", "echo ruok | nc 0.0.0.0 2181"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    networks:
+      - kafka
+    volumes:
+      - zookeeperDataDir:/var/lib/zookeeper/data
+      - ZookeeperLogDir:/var/lib/zookeeper/log
+    image: confluentinc/cp-zookeeper:5.5.0
+    container_name: zookeeper
   kafka:
-    image: confluentinc/cp-kafka:5.5.0
-    hostname: kafka
-    depends_on:
-      - zookeeper
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=LOCAL://192.168.0.114:9092,PLAINTEXT://kafka:9093
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=LOCAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_BROKER_ID=1
     ports:
       - "9092:9092"
     networks:
       - kafka
-    environment:
-      - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT:-zookeeper:2181}
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
-      - KAFKA_INTER_BROKER_LISTENER_NAME=${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT}
-      - KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS:-PLAINTEXT_HOST://localhost:9092,PLAINTEXT://kafka:9093}
-      - KAFKA_BROKER_ID=${KAFKA_BROKER_ID:-1}
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:-1}
-      - KAFKA_DELETE_TOPIC_ENABLE=${KAFKA_DELETE_TOPIC_ENABLE:-true}
-      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=${KAFKA_AUTO_CREATE_TOPICS_ENABLE:-true}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "test `kafka-topics --bootstrap-server kafka:9093 --list | wc -w` -gt 0"
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-  kafka-fill:
-    image: confluentinc/cp-kafka:5.5.0
-    command: ["/bin/bash", "-c", "./run.sh"]
-    working_dir: /home
     depends_on:
-      - kafka
       - zookeeper
-    environment:
-      - TOPIC=one
-    networks:
-      - kafka
-    volumes:
-      - ./test/:/home
-networks:
-  kafka:
-  postgresql:
+    image: confluentinc/cp-kafka:5.5.0
+    container_name: kafka
 volumes:
+  elasticsearch:
+  cassandra:
   pgdata:
+  zep:
+  rabbit:
+  zookeeperDataDir:
+  ZookeeperLogDir:
+networks:
+  zeppelin:
+    name: zeppelin
+    driver: bridge
+  elastic:
+    name: elastic
+    driver: bridge
+  cassandra:
+    name: cassandra
+    driver: bridge
+  postgresql:
+    name: postgresql
+    driver: bridge
+  rabbit:
+    name: rabbit
+    driver: bridge
+  kafka:
+    name: kafka
+    driver: bridge
+
