@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  mongo:
+    extends:
+      file: docker-compose.base.yml
+      service: mongo
+  mongo-express:
+    extends:
+      file: docker-compose.base.yml
+      service: mongo-express
+networks:
+  mongodb:
+    name: mongo
+    driver: bridge

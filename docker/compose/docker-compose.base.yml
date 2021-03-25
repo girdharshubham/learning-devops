@@ -1,4 +1,4 @@
-version: "3.5"
+version: "3.8"
 services:
   elasticssearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.3.1"
@@ -35,9 +35,8 @@ services:
       - cassandra
     volumes:
       - cassandra:/var/lib/cassandra
-      # - "./dumps/data:/var/lib/cassandra/data"
     environment:
-      - CASSANDRA_CLUSTER_NAME=bitbrew_configuration
+      - CASSANDRA_CLUSTER_NAME=configuration
       - CASSANDRA_NUM_TOKENS=4
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - CASSANDRA_RACK=b
@@ -57,7 +56,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=changeme
-      - POSTGRES_DB=bitbrew
+      - POSTGRES_DB=girdharshubham
     ports:
       - 5432:5432
   rabbit:
@@ -116,6 +115,26 @@ services:
       - zookeeper
     image: confluentinc/cp-kafka:5.5.0
     container_name: kafka
+  mongo:
+    image: mongo:4
+    container_name: mongo-server
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-root}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-changeme}
+    networks:
+      - mongodb
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=changeme
+    networks:
+      - mongodb
 volumes:
   elasticsearch:
   cassandra:
@@ -143,4 +162,6 @@ networks:
   kafka:
     name: kafka
     driver: bridge
-
+  mongodb:
+    name: mongo
+    driver: bridge
