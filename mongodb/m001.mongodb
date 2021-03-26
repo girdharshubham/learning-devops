@@ -104,3 +104,43 @@ db.routes.find(
         "$gte": 1
     }}
 )
+
+
+use("speakeasy")
+db.opsinit.find()
+db.opsinit.insert(
+    {
+        "_id": "1",
+        "name": "Shubham",
+        "age": "45"
+    }
+)
+db.opsinit.find()
+
+use("speakeasy")
+db.opsinit.insert([
+    {
+        "_id": "1",
+        "name": "Shubham",
+        "age": "45"
+    },
+    {
+        "_id": "1",
+        "name": "Shubham",
+        "age": "80"
+    },
+    {
+        "_id": "1",
+        "name": "Shubham",
+        "age": "89"
+    },
+    {
+        "_id": "2",
+        "name": "Mukesh",
+        "age": "59"
+    }
+    
+], {"ordered": false})
+
+use("speakeasy")
+db.opsinit.find()

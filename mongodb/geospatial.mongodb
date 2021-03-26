@@ -1,0 +1,37 @@
+show dbs
+
+use("maps")
+db.links.createIndex({"location": "2dsphere"})
+
+
+use("maps")
+db.links.find();
+db.links.insert( {
+    name: "Central Park",
+   location: { type: "Point", coordinates: [ -73.97, 40.77 ] },
+   category: "Parks"
+} );
+
+use("maps")
+db.links.find({
+    "location": {
+        "$near": {
+            "$geometry": {
+              "type": "Point",
+              "coordinates": [ -73.9667, 40.78 ]  
+            },
+            "$minDistance": 1000,
+            "$maxDistance": 5000
+        }
+    }
+})
+
+use("maps")
+db.links.insert( {
+    name: "Sara D. Roosevelt Park",
+   location: { type: "Point", coordinates: [ -73.9928, 40.7193 ] },
+   category: "Parks"
+} );
+
+use("maps")
+db.links.find();
