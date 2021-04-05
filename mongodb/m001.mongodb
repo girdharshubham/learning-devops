@@ -106,41 +106,78 @@ db.routes.find(
 )
 
 
-use("speakeasy")
-db.opsinit.find()
-db.opsinit.insert(
+use("sample_training")
+db.inspections.find( { "$and": [ { "result": "Out of Business" }, { "sector": "Home Improvement Contractor - 100"} ] } ).count()
+
+use("sample_training")
+db.zips.find ( {
+    "$and": [
+        {"pop": {"$lt": 1000000}},
+        {"pop": {"$gt": 5000}}
+        ]
+    }
+).count()
+
+use("sample_training")
+db.companies.find(
     {
-        "_id": "1",
-        "name": "Shubham",
-        "age": "45"
+        $and: [
+            { $or: [ { "founded_year": 2004}, {"founded_month": 10}]},
+            { $or: [ { "category_code": "web"}, { "category_code": "social"} ] }
+        ]
     }
 )
-db.opsinit.find()
+.count()
 
-use("speakeasy")
-db.opsinit.insert([
-    {
-        "_id": "1",
-        "name": "Shubham",
-        "age": "45"
-    },
-    {
-        "_id": "1",
-        "name": "Shubham",
-        "age": "80"
-    },
-    {
-        "_id": "1",
-        "name": "Shubham",
-        "age": "89"
-    },
-    {
-        "_id": "2",
-        "name": "Mukesh",
-        "age": "59"
+use("sample_training")
+db.trips.find(
+    { $expr: {
+                $and: [
+                    { $eq: [ "$start station id", "$end station id" ] },
+                    { $gt: ["$tripduration", 12000] }
+                ]
+        }
     }
-    
-], {"ordered": false})
+).count()
 
-use("speakeasy")
-db.opsinit.find()
+use("sample_training")
+db.companies.find(
+    {
+        $expr: {
+            $eq: [ "$permalink", "$twitter_username" ]
+        }
+    }
+).count()
+
+
+use("heremaps")
+db.links.insert(
+    {
+        "location": [
+            144.99781,
+            -37.83125
+        ],
+        "linkId": "1270855347",
+        "shape": [
+            "-37.8311341,144.997834",
+            "-37.8311341,144.997834"
+        ],
+        "speedLimit": 11.1111116
+    }
+)
+db.links.createIndex( { "location" : "2d" } )
+
+[
+    {
+        "coordinate": [
+            145.0288,
+            -37.81008
+        ],
+        "linkId": "840726716",
+        "shape": [
+            "-37.8100527,145.0285441",
+            "-37.8100527,145.0285441"
+        ],
+        "speedLimit": 16.6666679
+    }
+]

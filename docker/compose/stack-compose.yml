@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  elasticsearch:
+    extends:
+      file: docker-compose.base.yml
+      service: elasticsearch
+  kibana:
+    extends:
+      file: docker-compose.base.yml
+      service: kibana
+  cassandra:
+    extends:
+      file: docker-compose.base.yml
+      service: cassandra
+    environment:
+      CASSANDRA_CLUSTER_NAME: "configuration"
+  rabbit:
+    extends:
+      file: docker-compose.base.yml
+      service: rabbit
+volumes:
+  elasticsearch:
+  cassandra:
+  rabbit:
+networks:
+  elastic:
+    name: elastic
+    driver: bridge
+  cassandra:
+    name: cassandra
+    driver: bridge
+  rabbit:
+    name: rabbit
+    driver: bridge
