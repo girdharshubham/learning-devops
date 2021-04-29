@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  redis:
+    networks:
+      - redis
+    deploy:
+      replicas: 3
+    image: redis:6-alpine
+    command:
+      - redis-server
+      - --port 6379
+      - --cluster-enabled yes
+      - --cluster-node-timeout 5000
+      - --appendonly yes
+      - --appendfilename appendonly-6379.aof
+# After the node is up, exec into any node and then run the following command
+# Get container's ip address:
+# docker network inspect redis --format '{{range .Containers }}{{println .IPv4Address }}{{end}}' | cut -d"/" -f1
+# Exec in a container:
+# docker exec -it compose_redis_1 ash
+# Create cluster:
+# redis-cli --cluster create <container-ip-1>:6379 <container-ip-2>:6379 <container-ip-3>:6379
+# Test commands:
+# redis-cli -h compose_redis_1 -cs
+networks:
+  redis:
+    name: redis
+    driver: bridge

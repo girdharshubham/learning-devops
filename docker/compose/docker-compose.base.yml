@@ -135,6 +135,15 @@ services:
       - ME_CONFIG_MONGODB_ADMINPASSWORD=changeme
     networks:
       - mongodb
+  redis:
+    networks:
+      - redis
+    ports:
+      - 6379:6379
+    deploy:
+      replicas: 1
+    image: redis:6-alpine
+    command: redis-server --port  6379
 volumes:
   elasticsearch:
   cassandra:
@@ -164,4 +173,7 @@ networks:
     driver: bridge
   mongodb:
     name: mongo
+    driver: bridge
+  redis:
+    name: redis
     driver: bridge
