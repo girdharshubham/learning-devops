@@ -1,0 +1,8 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /opt/log/*.log
+
+output.elasticsearch:
+  hosts: ${ES_HOSTS}

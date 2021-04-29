@@ -1,0 +1,9 @@
+{
+    "index_patterns": [
+        "test-*"
+    ],
+    "settings": {
+        "index.lifecycle.name": "policy-name",
+        "index.lifecycle.rollover_alias": "test-alias"
+    }
+}

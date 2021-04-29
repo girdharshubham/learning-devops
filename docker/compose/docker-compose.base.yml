@@ -1,17 +1,22 @@
 version: "3.8"
 services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat-oss:6.6.1
+    networks:
+      - elastic
   elasticsearch:
-    image: "docker.elastic.co/elasticsearch/elasticsearch:7.3.1"
+    image:  docker.elastic.co/elasticsearch/elasticsearch:6.6.1
     container_name: "elasticsearch"
     networks:
       - elastic
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
     environment:
-      - cluster.name=sanbox
+      - cluster.name=docker-elasticsearch
       - xpack.security.enabled=true
       - discovery.type=single-node
-      - ELASTIC_PASSWORD=changeme
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
     # Uncomment below if you want to enable localhost:9200 to work
     ports:
       - "9200:9200"

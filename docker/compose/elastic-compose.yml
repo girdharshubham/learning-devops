@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  filebeat:
+    volumes:
+      - ../../elasticsearch/beats/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ../../elasticsearch/beats/filebeat/log:/opt/log
+    environment:
+      - ES_HOSTS=elasticsearch:9200
+    extends:
+      file: docker-compose.base.yml
+      service: filebeat
+  elasticsearch:
+    extends:
+      file: docker-compose.base.yml
+      service: elasticsearch
+volumes:
+  elasticsearch:
+networks:
+  elastic:
+    name: elastic
+    driver: bridge
