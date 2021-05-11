@@ -1,0 +1,6 @@
+version: "3.8"
+services:
+  aersospike:
+    extends:
+      service: aerospike
+      file: docker-compose.base.yml

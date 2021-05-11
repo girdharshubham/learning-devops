@@ -157,6 +157,8 @@ services:
     ports:
       - 8080:8080
     image: jenkins/jenkins:lts
+  aerospike:
+    image: aerospike/aerospike-server
 volumes:
   elasticsearch:
   cassandra:
