@@ -149,6 +149,14 @@ services:
       replicas: 1
     image: redis:6-alpine
     command: redis-server --port  6379
+  jenkins:
+    networks:
+      - jenkins
+    volumes:
+      - jenkins:/var/lib/jenkins
+    ports:
+      - 8080:8080
+    image: jenkins/jenkins:lts
 volumes:
   elasticsearch:
   cassandra:
@@ -157,6 +165,7 @@ volumes:
   rabbit:
   zookeeperDataDir:
   ZookeeperLogDir:
+  jenkins:
 networks:
   zeppelin:
     name: zeppelin
@@ -181,4 +190,7 @@ networks:
     driver: bridge
   redis:
     name: redis
+    driver: bridge
+  jenkins:
+    name: jenkins
     driver: bridge

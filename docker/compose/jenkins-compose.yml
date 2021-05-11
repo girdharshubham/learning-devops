@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  jenkins:
+    extends:
+      file: docker-compose.base.yml
+      service: jenkins
+volumes:
+  jenkins:
+networks:
+  jenkins:
+    name: jenkins
+    driver: bridge
