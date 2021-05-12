@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aerospike-tools
+  labels:
+    app: aerospike-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aerospike-tools
+  template:
+    metadata:
+      name: aerospike-tools
+      labels:
+        app: aerospike-tools
+    spec:
+      containers:
+        - image: aerospike/aerospike-tools:latest
+          name: aerospike-tools
+          command: ["sleep", "infinity"]
