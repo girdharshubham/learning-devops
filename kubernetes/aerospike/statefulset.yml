@@ -5,7 +5,7 @@ metadata:
   labels:
     app: aerospike
 spec:
-  replicas: 1
+  replicas: 3
   podManagementPolicy: OrderedReady
   updateStrategy:
     type: RollingUpdate
@@ -24,6 +24,9 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/aerospike
+          volumeDevices:
+            - devicePath: /dev/aero
+              name: aerospike-pd
           ports:
             - containerPort: 3000
               name: service
@@ -40,3 +43,15 @@ spec:
             items:
               - key: aerospike.conf
                 path: aerospike.conf
+  volumeClaimTemplates:
+    - metadata:
+        name: aerospike-pd
+        labels:
+          app: aerospike
+      spec:
+        storageClassName: aerospike-sc
+        accessModes: ["ReadWriteOnce"]
+        volumeMode: Block
+        resources:
+          requests:
+            storage: 1Gi

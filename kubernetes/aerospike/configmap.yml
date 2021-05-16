@@ -52,14 +52,17 @@ data:
       }
     }
 
-    namespace test {
+    namespace store {
       replication-factor 2
       memory-size 1G
-      default-ttl 30d # 5 days, use 0 to never expire/evict.
+
+      default-ttl 30d
       nsup-period 120
+
       storage-engine device {
-        file /opt/aerospike/data/test.dat
-        filesize 4G
-        data-in-memory true # Store data in memory in addition to file.
+        device /dev/aero
+        write-block-size 128K
+
+        data-in-memory true
       }
     }
