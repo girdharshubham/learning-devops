@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+
+    environment {
+        SBT_HOME = tool(
+                name: "SBT",
+                type: 'org.jvnet.hudson.plugins.SbtPluginBuilder$SbtInstallation'
+        )
+
+        PATH = "$SBT_HOME/bin:$PATH"
+    }
+
+    stages {
+        stage("Init") {
+            steps {
+                sh """
+                    sbt sbtVersion 
+                """
+            }
+        }
+    }
+}

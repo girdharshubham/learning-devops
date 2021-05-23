@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+
+    tools {
+        go "Go"
+    }
+
+    parameters {
+        string(
+                name: "COMMAND",
+                defaultValue: "version",
+                description: "The command to run"
+        )
+    }
+
+    stages {
+        stage("Init") {
+            steps {
+                sh """
+                    go $COMMAND
+                """
+            }
+        }
+    }
+}

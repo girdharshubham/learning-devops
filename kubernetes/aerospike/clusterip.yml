@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aerospike-svc
+  namespace: aerospike
+  labels:
+    app: aerospike
+    component: clusterIP
+spec:
+  ports:
+    - port: 3000
+      name: service
+  selector:
+    app: aerospike

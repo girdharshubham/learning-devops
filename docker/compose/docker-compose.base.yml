@@ -153,7 +153,7 @@ services:
     networks:
       - jenkins
     volumes:
-      - jenkins:/var/lib/jenkins
+      - jenkins:/var/jenkins_home
     ports:
       - 8080:8080
     image: jenkins/jenkins:lts

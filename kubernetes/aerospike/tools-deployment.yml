@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aerospike-tools
+  namespace: aerospike
   labels:
     app: aerospike-tools
+    component: deploy
 spec:
   replicas: 1
   selector:

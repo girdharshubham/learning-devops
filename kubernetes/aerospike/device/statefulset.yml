@@ -2,10 +2,12 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: aerospike
+  namespace: aerospike
   labels:
     app: aerospike
+    component: sts
 spec:
-  replicas: 3
+  replicas: 5
   podManagementPolicy: OrderedReady
   updateStrategy:
     type: RollingUpdate
@@ -48,10 +50,11 @@ spec:
         name: aerospike-pd
         labels:
           app: aerospike
+          component: pvc
       spec:
-        storageClassName: aerospike-sc
-        accessModes: ["ReadWriteOnce"]
+        storageClassName: aerospike-ebs
+        accessModes: [ "ReadWriteOnce" ]
         volumeMode: Block
         resources:
           requests:
-            storage: 1Gi
+            storage: 50Gi

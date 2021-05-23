@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(
+                name: "COMMAND_DOWNSTREAM",
+                defaultValue: "version",
+                description: "The Command to invoke downstream"
+        )
+    }
+    stages {
+        stage("Invoke Downstream") {
+            steps {
+                build job: "downstream",
+                        parameters: [
+                                string(name: "COMMAND", value: "$COMMAND_DOWNSTREAM")
+                        ]
+            }
+        }
+    }
+}

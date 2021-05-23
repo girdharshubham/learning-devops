@@ -2,8 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: aerospike-config
+  namespace: aerospike
   labels:
     app: aerospike-config
+    component: cm
 data:
   aerospike.conf: |
     service {
@@ -36,6 +38,10 @@ data:
         port 3002
 
         mesh-seed-address-port aerospike-0.aerospike-headless  3002
+        mesh-seed-address-port aerospike-1.aerospike-headless  3002
+        mesh-seed-address-port aerospike-2.aerospike-headless  3002
+        mesh-seed-address-port aerospike-3.aerospike-headless  3002
+        mesh-seed-address-port aerospike-4.aerospike-headless  3002
 
         interval 150
         timeout 10
@@ -53,8 +59,8 @@ data:
     }
 
     namespace store {
-      replication-factor 2
-      memory-size 1G
+      replication-factor 3
+      memory-size 4G
 
       default-ttl 30d
       nsup-period 120
@@ -62,7 +68,5 @@ data:
       storage-engine device {
         device /dev/aero
         write-block-size 128K
-
-        data-in-memory true
       }
     }
