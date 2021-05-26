@@ -40,8 +40,6 @@ data:
         mesh-seed-address-port aerospike-0.aerospike-headless  3002
         mesh-seed-address-port aerospike-1.aerospike-headless  3002
         mesh-seed-address-port aerospike-2.aerospike-headless  3002
-        mesh-seed-address-port aerospike-3.aerospike-headless  3002
-        mesh-seed-address-port aerospike-4.aerospike-headless  3002
 
         interval 150
         timeout 10
